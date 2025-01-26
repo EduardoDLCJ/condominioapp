@@ -132,7 +132,7 @@ const Login = ({ onLogin }) => {
           <div className="flex justify-center pt-5 space-x-2">
             <h1 className="text-sm text-gray-700">¿No tienes una cuenta?</h1>
             <button
-              onClick={handleRegister}
+              
               className="text-blue-500 hover:underline focus:outline-none"
             > Registrarse
             </button>
