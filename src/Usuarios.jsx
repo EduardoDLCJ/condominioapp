@@ -164,7 +164,7 @@ const Usuarios = () => {
                                         >
                                             <option value="Administrador">Administrador</option>
                                             <option value="Administración">Administración</option>
-                                            <option value="Dueño">Dueño</option>
+                                            <option value="Dueno">Dueño</option>
                                             <option value="Inquilino">Inquilino</option>
                                         </select>
                                     </div>
