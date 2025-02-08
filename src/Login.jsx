@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Lottie from 'lottie-react';
+import loadingAnimation from './assets/Animation - 1738769995911.json'; // Asegúrate de descargar un archivo JSON de Lottie y guardarlo en tu proyecto
 
 const Login = ({ onLogin }) => {
   const [telefono, setTelefono] = useState('');
   const [password, setPassword] = useState('');
   const [showWarning, setShowWarning] = useState(false);
   const [loginError, setLoginError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    document.title = "Inicio de sesión"; // Cambia el título de la página
+    document.title = "Inicio de sesión";
   }, []);
 
   const handleSubmit = async (e) => {
@@ -19,70 +22,61 @@ const Login = ({ onLogin }) => {
     if (!telefono || !password) {
       setShowWarning(true);
       setLoginError('');
-    } else {
-      setShowWarning(false);
-      setLoginError('');
+      return;
+    }
 
-      try {
-        const response = await fetch('https://apicondominio-7jd1.onrender.com/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            telefono: telefono,
-            contrasena: password,
-          }),
-        });
-      
-        const data = await response.json();
-      
-        if (response.ok) {
-          console.log('Inicio de sesión exitoso:', data);
-      
-          // Accede a las propiedades dentro del objeto `user`
-          const { tipoUsuario, departamento, torre } = data.user;
-      
-          if (tipoUsuario) {
-            localStorage.setItem('departamento', departamento);
-            localStorage.setItem('torre', torre);
-            localStorage.setItem('userRole', tipoUsuario);
-            console.log(localStorage.getItem('userRole'));
-      
-            switch (tipoUsuario) {
-              case 'Administrador':
-                navigate('/Inicio');
-                break;
-              case 'Dueno':
-                navigate('/InicioU');
-                break;
-              default:
-                alert('No tienes permisos para acceder a esta página');
-                break;
-            }
-          } else {
-            setLoginError('El campo tipoUsuario no está presente en la respuesta del servidor');
+    setShowWarning(false);
+    setLoginError('');
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('https://apicondominio-7jd1.onrender.com/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ telefono, contrasena: password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log('Inicio de sesión exitoso:', data);
+        const { tipoUsuario, departamento, torre } = data.user;
+
+        if (tipoUsuario) {
+          localStorage.setItem('departamento', departamento);
+          localStorage.setItem('torre', torre);
+          localStorage.setItem('userRole', tipoUsuario);
+
+          switch (tipoUsuario) {
+            case 'Administrador':
+              navigate('/Inicio');
+              break;
+            case 'Dueno':
+              navigate('/InicioU');
+              break;
+            default:
+              alert('No tienes permisos para acceder a esta página');
           }
         } else {
-          setLoginError('Tu nombre de usuario o contraseña son incorrectos');
-          setShowWarning(false);
+          setLoginError('El campo tipoUsuario no está presente en la respuesta del servidor');
         }
-      } catch (error) {
-        console.error('Error al iniciar sesión:', error);
-        setLoginError('Hubo un problema con el servidor, por favor intenta más tarde');
+      } else {
+        setLoginError('Tu nombre de usuario o contraseña son incorrectos');
       }
-      
+    } catch (error) {
+      console.error('Error al iniciar sesión:', error);
+      setLoginError('Hubo un problema con el servidor, por favor intenta más tarde');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleRegister = async () => {
-    navigate('/Registro');
-  };
-
   return (
-    <div className="flex items-center justify-center min-h-screen fondo ">
-      <div className='flex flex-col items-center'>
-        <div className='logo flex items-center mb-4'></div>
+    <div className="flex items-center justify-center min-h-screen fondo">
+      <div className="flex flex-col items-center">
+        <div className="logo flex items-center mb-4"></div>
         <div className="w-full max-w-md p-8 space-y-4 bg-neutral-50 rounded-4xl shadow-md">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-800">Inicio de Sesión</h1>
@@ -120,21 +114,28 @@ const Login = ({ onLogin }) => {
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
-
-            <button
-              type="submit"
-              className="w-full px-4 py-2 font-bold text-white bg-blue-500 rounded-4xl hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            >
-              Iniciar sesión
-            </button>
+            <div className="flex justify-center items-center h-12">
+              {isLoading ? (
+                <Lottie animationData={loadingAnimation} className="w-16 h-16" />
+              ) : (
+                <button
+                  type="submit"
+                  className="w-full flex justify-center items-center px-4 py-2 font-bold text-white bg-blue-500 rounded-4xl hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  disabled={isLoading}
+                >
+                  Iniciar sesión
+                </button>
+              )}
+            </div>
           </form>
 
           <div className="flex justify-center pt-5 space-x-2">
             <h1 className="text-sm text-gray-700">¿No tienes una cuenta?</h1>
             <button
-              
+              onClick={() => navigate('/Registro')}
               className="text-blue-500 hover:underline focus:outline-none"
-            > Registrarse
+            >
+              Registrarse
             </button>
           </div>
         </div>
